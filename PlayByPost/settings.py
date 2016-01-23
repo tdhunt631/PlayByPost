@@ -58,7 +58,7 @@ ROOT_URLCONF = 'PlayByPost.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['PlayByPost/templates/'],
+        'DIRS': [os.path.join(BASE_DIR, 'PlayByPost/templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
