@@ -1,0 +1,12 @@
+<div class="new comment" id="{{comment.id}}" style="margin: 0px; padding: 5px 5px 5px 25px; border-bottom: 1px solid white;">
+    <div style="font-weight: bold;  font-size: 110%">{{ comment.user }}                 
+        <!-- if you the admin or the post is yours you can delete it -->     
+        {% if user.is_staff or comment.user == user %}
+            <span style="color: #999; font-size: 60%; padding-left: 5px;" class="comment-remove pull-right glyphicon glyphicon-remove"> </span>
+        {% endif %}                  
+    </div>
+    <!-- date and comment toggle -->
+    <div style="font-size:80%; color:#999; position: relative; top: -3px"> {{ comment.pub_date|date:'N d, o P' }}</div>
+    <!-- here is the actual post -->
+    <div style="padding: 0px;">{{ comment }}</div>
+</div>

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - My Games
+{% endblock %}
+
+{% block extrascripts %}   
+
+   <script src="{% static "Game/js/spectrum2.js" %}"> </script>   
+   <link href="{% static "Game/css/spectrum.css" %}" rel="stylesheet">
+   <script>
+   $(document).ready(function(){
+    // Color Picker Box
+    $(function() {
+        $(".colorPick").spectrum({
+          flat: false,
+          showInput: true,
+          preferredFormat: "rgb",
+          color: "{{character.color}}",
+        });
+    });
+    
+    });
+    
+   </script>
+{% endblock %}
+
+{% block content%}
+    <div class="page-header">
+        <h1>My Characters<small> All the characters that belong to you.</small></h1>
+    </div>
+    {% if character %}
+    <div style="margin: 0 auto 0 auto; width: 200px; text-align: center">
+        <form method="post" action=".">
+            {% csrf_token %}
+            <input id="id_name" name="name" class="form-control" value="{{character.name}}">
+            <br>
+            <input id="id_color" name="color" class="colorPick" value="{{character.color}}">
+            <br><br>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,556 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - {{ game.title }}
+{% endblock %}
+
+{% block extrascripts %}
+    {% for character in characters %}
+        {% if character.user = user%}
+            {% if character.pending == True %}
+                <meta http-equiv="refresh" content="0; url=/pending/{{game.id}}/" />
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    <style type="text/css">
+        .fixed {  
+            position: fixed;   
+            top: 74px;  
+            margin-left: 666px;  
+            width: 333px;
+        }
+    
+        .container {
+            width: 1000px;
+        }
+    
+        .map {
+            width: 100%;
+            background-image: url("{{game.map}}");
+            background-size:100% 100%;
+            background-repeat:no-repeat;   
+        }
+        
+        .gridCell {
+            width: 15px;
+            height: 15px; 
+            background-color: rgb(255, 255, 255);
+            background: transparent;
+        }
+        
+        .gridRow {
+            height: 15px;
+        }
+                
+        .toggleBtn{
+            background-color: #ccc;
+            height: 25px;
+            width: 25px;
+            border-radius: 5px;}
+            
+        .toggleBtn:hover{
+            background-color: #bbb;
+            cursor: pointer;}
+            
+        .glyphicon-remove {
+            cursor:pointer;
+        }
+
+    </style>  
+    
+    <script> 
+    
+//update character color
+    {% for character in characters %}
+        {% if character.user == user %}
+            // save new color in database
+            function updateColor(){                
+                $('#id_color').val($('.sp-preview-inner').css('background-color'));
+                var data = $('#colorPickform').serialize();
+                $.ajax({
+                    url: "{% url 'Game:update_color' character.id %}",
+                    type: "POST",
+                    data: data,
+                    success: function(d) {
+                        console.log(d);
+                        location.reload();
+                    },
+                    error: function(d){
+                        console.log(d);
+                    },
+                });
+            };
+        {% endif %}
+    {% endfor %}
+    
+//function to get the csrftoken
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+//set click handlers
+    function setClickHandlers(){
+        //remove previous click handlers
+        $('.comment-remove').off("click");
+        $('.post-remove').off("click");
+        $('.commentBtn').off("click");
+        $('.toggleBtn').off("click");
+        
+        // delete comments
+        $('.comment-remove').click(function(event){
+            event.preventDefault();
+            $comment = $(this).closest('div.comment');
+            
+            $.ajax({
+                url: "/deleteComment/"+ $comment.attr('id') +"/",
+                success: function(data) {
+                    $comment.slideUp("slow", function() {
+                         $(this).remove(); 
+                    });            
+                },
+                error: function(d){
+                    console.log(d);
+                },
+            });
+        });
+        
+        //delete posts
+        $('.post-remove').click(function(event){
+            event.preventDefault();
+            $post = $(this).parent().closest('div.post');
+            $post.slideUp("slow", function() {
+                $(this).closest('tr').remove();
+            });
+            
+            $.ajax({
+                url: "/deletePost/"+ $post.attr('id') +"/",
+                success: function(data) {
+                    // do something?
+                },
+                error: function(d){
+                    console.log(d);
+                },
+            });
+        });
+        
+        //toggle the visible comments for each post
+        $('.commentBtn').click(function(e) {
+            e.preventDefault();
+            $(this).closest("td").find('.comments').slideToggle();
+        });    
+        
+        //togle the map and descriptrion
+        $('.toggleBtn').click(function(e) {
+            e.preventDefault();
+            $(this).parent().parent().find('table').toggle();
+            if($('span', this).hasClass('glyphicon-chevron-down')) {
+                $('span', this).removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            }
+            else {
+                $('span', this).removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            }
+        }); 
+    }
+    
+    $(document).ready(function(){
+//Default map and description to hidden
+        $('.description').hide();
+        $('.map').hide();
+
+//right column move with scroll
+        var offset = $('.rightColumn').offset();  
+
+         $(window).scroll(function () {  
+           var scrollTop = $(window).scrollTop(); // check the visible top of the browser  
+        
+           if (offset.top<scrollTop) $('.rightColumn').addClass('fixed');  
+           else $('.rightColumn').removeClass('fixed');  
+          });
+          
+//set click handlers          
+        setClickHandlers();
+        
+//set background color for each characters current location
+        locations = [];
+        colors = [];
+        {% for loc in game.getLocations %}
+            locations.push('{{ loc }}');            
+        {% endfor %}
+        {% for color in game.getColors %}
+            colors.push('{{ color }}');            
+        {% endfor %}
+        for(i=0;i<locations.length;i++){
+            $("#" + locations[i]).html("<div class=\"marker\" style=\"background-color:" + colors[i] + "; border-radius: 7.5px; width: 15px; height: 15px;\"></div>");
+        }
+        
+// click handler for the comment form
+        $( ".commentForm" ).submit(function( event ) {
+            var $form = $(this);
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr('action'),
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(data) {
+                    //append new data
+                    $temp = data;
+                    parentDiv = $form.parent().after(data);
+                    $('.new').hide();
+                    $('.new').fadeIn();
+                    
+                    //remove all "new" classes
+                    $('.new').removeClass('new');
+                    
+                    //clear the form input
+                    $($form)[0].reset();
+                    
+                    //reset delete click handlers
+                    setClickHandlers();
+                },
+                error: function(d){
+                    console.log(d);
+                    location.reload();
+                },
+            });
+            return false;
+        });
+        
+        {% for character in characters %}
+            {% if character.user == user %}  
+
+// click handler for the post form
+                $( "#postForm" ).submit(function( event ) {
+                    event.preventDefault();
+                    $.ajax({
+                        url: "{% url 'Game:character_post' game.id character.id %}",
+                        type: "POST",
+                        data: $(this).serialize(),
+                        success: function(data) {
+                            //prepend the new table row
+                            $temp = data;
+                            $('#postTable').prepend($temp);
+                            $('.new').hide();
+                            $('.new').fadeIn();
+                            
+                            //remove all "new" classes
+                            $('.new').removeClass('new');
+                            
+                            //clear the form input
+                            $('#id_post').val("");
+                                                        
+                            // reload click handlers
+                            setClickHandlers();                            
+                                                        
+                            //reload click handler for the comment form
+                            $( ".commentForm" ).off("submit");
+                            $( ".commentForm" ).submit(function( event ) {
+                                var $form = $(this);
+                                event.preventDefault();
+                                $.ajax({
+                                    url: $(this).attr('action'),
+                                    type: "POST",
+                                    data: $(this).serialize(),
+                                    success: function(data) {
+                                        //append new data
+                                        $temp = data;
+                                        parentDiv = $form.parent().after(data);
+                                        $('.new').hide();
+                                        $('.new').fadeIn();
+                                                                                
+                                        //remove all "new" classes
+                                        $('.new').removeClass('new');
+                                        
+                                        //clear the form input
+                                        $($form)[0].reset();       
+                                        
+                                        // reload click handlers
+                                        setClickHandlers();                                     
+                                    },
+                                    error: function(d){
+                                        console.log(d);
+                                        location.reload();
+                                    },   
+                                });
+                            });                               
+                        },
+                        error: function(d){
+                            console.log(d);
+                            //location.reload();
+                        },
+                    });
+                });
+            
+// Color Picker Box
+                $(function() {
+                    $(".colorPick").spectrum({
+                      flat: false,
+                      showInput: true,
+                      preferredFormat: "rgb",
+                      color: "{{character.color}}",
+                    });
+                });
+                
+//mark character position on map
+                $(".gridCell").hover(
+                function() {
+                    // mouse over
+                    $colorOrig=$(this).html();
+                    // only change the color if it is not occupied already (not white)
+                    if ($colorOrig == " "){
+                        $bg = $('.sp-preview-inner').css('background-color');
+                        $(this).html("<div style=\"background-color:" + $bg + "; border-radius: 7.5px; width: 15px; height: 15px;\"></div>");
+                        //save row and col to the database
+                        $(this).click(function(e){
+                            e.preventDefault();
+                            //show on map
+                            //$(this).html("<div style=\"background-color:" + $bg + "; border-radius: 7.5px; width: 15px; height: 15px;\"></div>");
+                            //handle the click
+                            var id = $(this).attr('id');  //get the row and col numbers
+                            var temp = id.split("-"); //split into an array with 2 parts
+                            var row = parseInt(temp[0]); //assign a number to the row
+                            var column = parseInt(temp[1]); //assign a number to the col
+                            var csrftoken = getCookie('csrftoken'); //get csrf token for form validation
+                            var data = {
+                                'row' : row,
+                                'column' : column,
+                                'csrfmiddlewaretoken' : csrftoken,
+                            };
+                            // send the data via ajax
+                            $.ajax({
+                                url: "{% url 'Game:update_location' character.id %}",
+                                type: "POST",
+                                data: data,
+                                success: function(d) {
+                                    location.reload();
+                                },
+                                error: function(d){
+                                    console.log(d);
+                                },
+                            });
+                            return false;
+                        });
+                    }
+                }, function() {
+                    //mouse out
+                    $(this).html($colorOrig);
+                });                
+                
+            {% endif %}
+        {% endfor %}
+        
+// this function will get the round expiration date and convert it to javascript so we can display the timer
+        $(function() {   
+            var expirationDate = new Date("{{round.expiration_date|date:'Y-m-d H:i'}}");
+            var now = new Date();
+            // set the timer
+            if (expirationDate.getTime() > now.getTime()) {
+                $('#timer').countdown({until: expirationDate});
+                $('#year').text(expirationDate.getFullYear());
+            }
+            else {
+                $('#timer').html('<h1 style="color: red; margin: 0; padding: 0;">Round Over</h1>');
+            }
+        });         
+    });
+    </script>
+    
+    <link href="{% static "Game/css/spectrum.css" %}" rel="stylesheet">
+    <link href="{% static "Game/css/countdown.css" %}" rel="stylesheet">
+    <script src="{% static "Game/js/spectrum.js" %}"> </script>
+    <script src="{% static "Game/js/plugin.js" %}"> </script>
+    <script src="{% static "Game/js/countdown.js" %}"> </script>
+    
+{% endblock %}
+
+{% block content%}
+{% if game %}
+    <div class="page-header">
+        <h1>{{ game.title }}<small> Round {{ round.round_number }}</small>
+            <small class="pull-right" id="timer" style="margin-top: 0px; color: green;"> </small>
+            {% if game.owner == user %}
+                <a href="/round/{{round.id}}/" style="margin: 18px 10px 0 0" class="btn btn-primary btn-xs pull-right">Edit Round</a>
+            {% endif %}   
+        </h1>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            
+            <!-- Game Description -->
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title" style="float: left; padding-top: 4px;"><strong>Game Description</strong></h4>       
+                    <!-- if user is admin they can edit the map -->                    
+                    {% if game.owner == user %}
+                        <a href="/editDescription/{{game.id}}/" style="margin: 1px 0 0 15px;" class="btn btn-primary btn-xs">Edit Description</a>
+                    {% endif %}                
+                    <!-- toggle button -->
+                    <div style="float: right;" class="toggleBtn">
+                        <span style="position: relative; top: 5px; left: 6px;" class="glyphicon glyphicon-chevron-down"> </span>
+                    </div>
+                </div>
+                <table class="table description">                    
+                    <tr>
+                        <td>
+                            {{ game.description }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Game Map -->
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title" style="float: left; padding-top: 4px;"><strong>Game Map</strong></h4>            
+                    <!-- if user is admin they can edit the map -->                    
+                    {% if game.owner == user %}
+                        <a href="/map/{{game.id}}/" style="margin: 1px 0 0 15px;" class="btn btn-primary btn-xs">Edit Map</a>
+                    {% endif %}   
+                    <!-- toggle button -->
+                    <div style="float: right;" class="toggleBtn">
+                        <span style="position: relative; top: 5px; left: 6px;" class="glyphicon glyphicon-chevron-down"> </span>
+                    </div>
+                </div>
+                
+                <!-- grid is 36x36 for now -->
+                {{game.getGrid|safe}}                
+                
+            </div>        
+                
+            <!-- Game Post and Comments -->
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title" style="float: left; padding-top: 4px;"><strong>Game Posts</strong></h4>              
+                </div>
+                <table id="postTable" class="table">
+                    {% if posts %}
+                        {% for post in posts %}      
+                            <tr>
+                                <td style="padding: 0px;">
+                                    <div class="post" id="{{post.id}}">
+                                        <!-- charcater and edit buttons -->
+                                        <div class="clearfix" style="padding: 5px; font-weight: bold; color: {{ post.character.color }}; font-size: 110%">
+                                            {{ post.character }} 
+                                            {% if game.owner == user or post.user == user %}
+                                                <span style="color: #999; font-size: 70%; padding-left: 5px;" class="post-remove pull-right glyphicon glyphicon-remove"> </span>                    
+                                            {% endif %}
+                                        </div>
+                                        <!-- date and comment toggle -->
+                                        <div style="font-size:80%; color:#999; padding: 5px 5px; margin: -10px 0 0 0;"> {{ post.pub_date|date:'N d, o P' }} - <a href="#" class="commentBtn">comments ({{post.getComments|length}}) </a></div>
+                                        <!-- here is the actual post -->
+                                        <div style="padding: 0px 5px 0px 5px; margin: -3px 0 3px 0;">{{ post }}</div>
+                                        
+                                        <!-- comments on the post -->
+                                        <div class="comments" style="background-color: #efefef; display: none; font-size: 95%;">
+                                            <div style="padding: 5px 5px 5px 5px; border-bottom: 1px solid white;">
+                                                <form class="commentForm" action="{% url 'Game:comment_post' post.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input placeholder=" Enter your new comment and press enter" style="width: 100%" type="text" id="id_comment" name="comment">
+                                                </form>
+                                            </div>
+                                            {% for comment in post.getComments %}
+                                                <div class="comment" id="{{comment.id}}" style="margin: 0px; padding: 5px 5px 5px 25px; border-bottom: 1px solid white;">
+                                                    <div style="font-weight: bold;  font-size: 110%">{{ comment.user }}                 
+                                                        <!-- if you the admin or the post is yours you can delete it -->     
+                                                        {% if game.owner == user or comment.user == user %}
+                                                            <span style="color: #999; font-size: 60%; padding-left: 5px;" class="comment-remove pull-right glyphicon glyphicon-remove"> </span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <!-- date and comment toggle -->
+                                                    <div style="font-size:80%; color:#999; position: relative; top: -3px"> {{ comment.pub_date|date:'N d, o P' }}</div>
+                                                    <!-- here is the actual post -->
+                                                    <div style="padding: 0px;">{{ comment }}</div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>    
+                        {% endfor %}
+                  
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+         
+        
+        <div class="col-md-4 rightColumn">            
+        {% if game.owner == user%}
+            {{game.getPending|safe}}
+        {% endif %}
+    
+        <!-- list of active characters -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><strong>Characters</strong></h4>
+                </div>
+                <table class="table">
+                    {% for character in characters %}
+                        {% if character.pending == False %}
+                            <!-- if character belongs to current user allow edit -->
+                            {% if character.user == user %}
+                                <tr>
+                                    <td>{{ character }}:</td>                                    
+                                    <td>
+                                        <form id="colorPickform" method="post" action="{% url 'Game:update_color' character.id %}">
+                                            <input id="id_color" name="color" class="colorPick">
+                                            {% csrf_token %}
+                                        </form>
+                                    </td>
+                                    {% if game.owner == user%}
+                                        <td> <a href="/deleteCharacter/{{character.id}}/"  class="btn btn-danger btn-xs">Delete</a> </td>
+                                    {% endif %}
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td>{{ character }}:</td>                                    
+                                    <td>
+                                        <div style="margin-left: 5px; width: 15px; height: 15px; background-color: {{character.color}}"> </div>
+                                    </td>
+                                    {% if game.owner == user%}
+                                        <td> <a href="/deleteCharacter/{{character.id}}/"  class="btn btn-danger btn-xs">Delete</a> </td>
+                                    {% endif %}                                   
+                                </tr>                            
+                            {% endif %}                           
+                        {% endif %}                                                   
+                    {% endfor %}                                                   
+                </table>
+            </div>                
+            
+            <div class="well clearfix">
+                {% for character in characters %}
+                    {% if character.user == user %}
+                <form id="postForm" method="post" action="{% url 'Game:character_post' game.id character.id %}">
+                    {% endif %}
+                {% endfor %}
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_post">Character Post</label>
+                        <textarea style="height: 100px" class="form-control" id="id_post" name="post"> </textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right">Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="page-header">
+        <h1>OOPS!<small> I couldn't find your game.'</small></h1>
+    </div>
+{% endif %}
+
+{% endblock %}

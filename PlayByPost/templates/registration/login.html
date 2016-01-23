@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block extrascripts %}
+    <!-- Custom styles for this template  -->
+    <link href="{% static "Game/css/signin.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Member login <small> Your quest awaits.</small></h1>
+</div>
+
+{% if form.non_field_errors %}
+    {{ form.non_field_errors }}
+{% endif %}
+
+<div class="container">
+    <form class="form-signin" method="post" action=".">
+        {% csrf_token %}
+        <br />
+        <input type="text" class="form-control" placeholder="Username" id="id_username" name="username" required autofocus>
+        <input type="password" class="form-control" placeholder="Password" id="id_password" name="password" required>
+        <input type="hidden" name="next" value="{{ next }}" />
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+    </form>
+    
+    <h3 align="center" style="margin-bottom: 0px;" class="form-signin-heading">Stranger?</h3>
+    <form class="form-signin" action="/accounts/register/">
+        <button class="btn btn-lg btn-primary btn-block">Register</button>
+    </form>
+</div>
+
+{% endblock %}

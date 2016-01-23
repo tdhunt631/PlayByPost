@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    The Foaming Mug - Round Based Role Playing Games
+{% endblock %}
+
+{% block extrascripts %}
+<script>
+$(document).ready(function(){
+    $('#id_game').val('{{ request.GET.id }}');
+    //2014-04-13 11:59:59
+    var now = new Date();    
+    now.setDate(now.getDate() + 20);
+    year = now.getFullYear();
+    month = now.getMonth()+1;
+    hour = now.getHours();
+    minutes = now.getMinutes();
+    seconds = now.getSeconds();
+    date = now.getDate();
+    string = year+"-"+month+"-"+date+" "+hour+":"+minutes+":"+seconds;
+    $('#id_expiration_date').val(string);
+    $('#createRound').submit();
+});
+</script>
+{% endblock %}
+
+{% block content%}
+    {% if form %}
+        <form enctype="multipart/form-data"  id="createRound" class="" method="post" action=".">
+            {% csrf_token %}
+            {{form.as_table}}
+            <button class="btn btn-primary" type="submit">save</button>
+        </form>
+    {% else %}
+        <h2> You must be logged in to create a game! </h2>
+    {% endif %}
+
+{% endblock %}

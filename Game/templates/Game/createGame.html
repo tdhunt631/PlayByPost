@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    The Foaming Mug - Round Based Role Playing Games
+{% endblock %}
+
+{% block content%}
+    <div class="page-header">
+            <h1>Create a Game <small>Complete the fields to create a new game</small></h1>
+        </div>    
+    {% if form %}
+    <div style="width: 400px; margin: 30px auto 0 auto; text-align: center">
+        <form enctype="multipart/form-data"  id="createGame" class="" method="post" action=".">
+            {% csrf_token %}
+            <input class="form-control" id="id_title" maxlength="100" name="title" type="text" placeholder="Game Title"/><br>
+            <textarea class="form-control" cols="40" id="id_description" name="description" rows="10" placeholder="Game Description"></textarea><br>
+            <input class="form-control" id="id_game_system" maxlength="100" name="game_system" type="text" placeholder="Game System" /><br>
+            <label  for="id_is_public">This game is open to the public: </label><input style="margin-left: 10px;" checked="checked" id="id_is_public" name="is_public" type="checkbox" />          <br> <br> 
+            <input class="form-control" type="text" id="id_character" name="character" placeholder="Enter a Character Name (GM)"><br>
+            <button class="btn btn-primary" type="submit">Create Game</button>
+        </form>
+    </div>
+    {% else %}
+        <h2> You must be logged in to create a game! </h2>
+    {% endif %}
+
+{% endblock %}

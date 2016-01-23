@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    The Foaming Mug - Round Based Role Playing Games
+{% endblock %}
+
+{% block content%}
+    {% if game %}
+        <div class="page-header">
+            <h1>{{game}} <small>Enter a character name to continue.</small></h1>
+        </div>    
+        <div style="text-align: center; margin: 0 auto 0 auto; width: 200px;"><br>
+            <form enctype="multipart/form-data"  id="createRound" class="" method="post" action=".">
+                {% csrf_token %}
+                <input style="width: 200px;" class="form-control" id="id_name" maxlength="32" name="name" type="text" placeholder="Enter a character name"/><br>
+                
+                <button class="btn btn-primary" type="submit">Join Game</button>
+            </form>
+        </div>
+    {% endif %}
+
+{% endblock %}

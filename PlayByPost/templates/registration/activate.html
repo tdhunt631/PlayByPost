@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Activation{% endblock %}
+
+{% block content %}
+<h2>Account Activation</h2>
+
+{% url django.contrib.auth.views.login as login_url %}
+{% if not login_url %}
+    {% url auth_login as login_url %}
+{% endif %}
+
+<p>Thank you for activating your membership!  You may now <a href="{% if not login_url %}/accounts/login/{% else %}{{ login_url }}{% endif %}">login</a>.</p>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - My Games
+{% endblock %}
+
+{% block extrascripts %}
+    <style type="text/css">
+        h3 {
+            margin: 40px 0 0 0;
+        }
+    </style>
+    
+    <script>
+        $('#deleteBtn').click(function(){
+            alert("Are you sure you want to delete this character? All character history will be lost!");
+        });
+    </script>
+{% endblock %}
+
+{% block content%}
+    <div class="page-header">
+        <h1>My Characters<small> All the characters that belong to you.</small></h1>
+    </div>
+    {% if characters %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>Name</th>
+                <th>Game</th>
+                <th align="center">Color</th>      
+                <th align="center">Edit</th>
+                <th align="center">Delete</th>         
+            </tr>
+            {% for character in characters %}
+                <tr>                    
+                    <td>{{ character.name }}</td>
+                    <td>{{ character.game }}</td>
+                    <td align="center"><div style="background-color:{{ character.color }}; height: 20px; width: 20px;"> </div></td>
+                    <td align="center"><a href="/editCharacter/{{character.id}}/"  class="btn btn-success btn-xs">Edit</a></td>
+                    <td align="center"><a href="/deleteCharacter/{{character.id}}/" id="deleteBtn" class="btn btn-danger btn-xs">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="margin: 0 auto 0 auto; width: 600px; text-align:center;">
+        <h2>You don't have any characters yet. Here are a few options for you.</h2>
+            <h3>Create a new game:</h3>
+            <a href="{% url 'Game:create_game' %}" style="margin-top: 10px;" type="button" class="btn btn-success btn-sm">New Game</a>
+            <h3>Join a game:</h3>
+            <a href="/" style="margin-top: 10px;" type="button" class="btn btn-success btn-sm">Find Game</a>
+            <h3>Create a character for an existing game:</h3>
+           <br>
+            {% for game in games %}
+                <a href="{% url 'Game:create_character' game.id %}" type="button" class="btn btn-success btn-sm">{{game}}</a>
+            {% endfor %}
+            
+        </div>
+        
+    {% endif %}
+{% endblock %}

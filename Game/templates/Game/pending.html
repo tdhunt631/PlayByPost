@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - Round Based Role Playing Games
+{% endblock %}
+
+{% block extrascripts %}
+
+{% endblock %}
+
+{% block content%}    
+    
+    {% if game %}
+        <div class="page-header">
+            <h1>The game owner has not yet accepted your game request.</h1>
+        </div>    
+    {% endif %}
+    
+{% endblock %}

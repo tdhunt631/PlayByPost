@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Activation{% endblock %}
+
+{% block content %}
+<h2>Account Activation</h2>
+
+<p>Thank you for activating your membership!  You may now <a href="{% url django.contrib.auth.views.login %}">login</a>.</p>
+{% endblock %}

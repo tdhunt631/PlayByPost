@@ -1,0 +1,28 @@
+from django.conf.urls import patterns, url
+from Game import views
+
+urlpatterns = patterns('',
+    url(r'^$', views.Index.as_view(), name="index"),
+    url(r'^game/(?P<pk>\d+)/$', views.GameIndex.as_view(), name="game_index"),
+    url(r'^joinGame/(?P<pk>\d+)/$', views.JoinGame.as_view(), name="join_game"),
+    url(r'^map/(?P<pk>\d+)/$', views.EditMap.as_view(), name="edit_map"),
+    url(r'^round/(?P<pk>\d+)/$', views.EditRound.as_view(), name="edit_round"),
+    url(r'^createRound/$', views.CreateRound.as_view(), name="create_round"),
+    url(r'^createCharacter/(?P<pk>\d+)/$', views.CreateCharacter.as_view(), name="create_character"),
+    url(r'^createGame/$', views.CreateGame.as_view(), name="create_game"),
+    url(r'^UpdateColor/(?P<pk>\d+)/$', views.UpdateColor.as_view(), name="update_color"),
+    url(r'^post/(?P<pk>\d+)/(?P<character>\d+)/$', views.CharacterPost.as_view(), name="character_post"),
+    url(r'^comment/(?P<pk>\d+)/$', views.CommentPost.as_view(), name="comment_post"),
+    url(r'^deleteComment/(?P<commentId>\d+)/$', views.commmentDelete, name="comment_delete"),
+    url(r'^deletePost/(?P<postId>\d+)/$', views.postDelete, name="post_delete"),
+    url(r'^activateCharacter/(?P<pk>\d+)/$', views.activateCharacter, name="activate_ character"),
+    url(r'^deleteCharacter/(?P<pk>\d+)/$', views.characterDelete, name="character_delete"),
+    url(r'^saveMap/(?P<pk>\d+)/$', views.SaveMap.as_view(), name="save_map"),
+    url(r'^editDescription/(?P<pk>\d+)/$', views.EditDescription.as_view(), name="edit_description"),
+    url(r'^UpdateLocation/(?P<pk>\d+)/$', views.UpdateLocation.as_view(), name="update_location"),
+    url(r'^editCharacter/(?P<pk>\d+)/$', views.EditCharacter.as_view(), name="edit_character"),
+    url(r'^myGames/$', views.MyGames.as_view(), name="my_games"),
+    url(r'^pending/(?P<pk>\d+)/$', views.Pending.as_view(), name="pending"),    
+    url(r'^myCharacters/$', views.MyCharacters.as_view(), name="my_characters"),    
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+)

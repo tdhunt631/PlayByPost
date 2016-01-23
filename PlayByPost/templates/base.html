@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %} Play By Post {% endblock %}</title>
+        <!-- Latest compiled and minified CSS -->
+        <!-- see http://netdna.bootstrapcdn.com/#bootswatch for some other "flavors" to try -->
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+        
+		<!-- Latest compiled and minified JavaScript -->
+        <script src="http://code.jquery.com/jquery.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        
+        <!-- Extra CSS -->
+        <style type="text/css">
+            /* Move down content because we have a fixed navbar that is 50px tall */
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+        </style>
+		
+        {% block extrascripts %}
+        {% endblock %}
+    </head>
+    <body>
+		
+		<!-- NAVBAR -->
+        <div class="navbar navbar-inverse navbar-fixed-top" >
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">The Foaming Mug</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <span style="color: #aaa; position:relative; top: 15px; font-size: 90%;">Hi, {{request.user}}!</span>
+                    <ul class="nav navbar-nav navbar-right">           
+                        {% if not user.is_authenticated %}
+                            <li><a href="{% url 'auth_login' %}">Login</a></li>
+                        {% else %}
+                            {% if user.is_staff %}
+                                <li><a href="/admin/">Admin</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'Game:my_games' %}">My Games</a></li>
+                            <li><a href="{% url 'Game:my_characters' %}">My Characters</a></li>
+                            <li><a href="{% url 'auth_logout' %}">Logout</a></li>
+                        {% endif %}
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+		
+		<!-- Main Content -->
+		<div class="container">
+			{% block content %}
+			
+			{% endblock %}
+		</div>
+	</body>
+</html>

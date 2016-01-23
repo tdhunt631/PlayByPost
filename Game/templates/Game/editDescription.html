@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - My Games
+{% endblock %}
+
+{% block extrascripts %}   
+
+{% endblock %}
+
+{% block content%}
+    <div class="page-header">
+        <h1>Edit Description<small> Update the game or current rounds description.</small></h1>
+    </div>
+    <div style="margin: 0 auto 0 auto; width: 500px; text-align: center">
+        <form method="post" action=".">
+            {% csrf_token %}           
+            <textarea style="width:500px; height: 300px;" id="id_description" name="description" >{{game.description}}</textarea>
+            <br><br>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+{% endblock %}

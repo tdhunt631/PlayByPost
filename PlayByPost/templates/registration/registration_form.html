@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Member Registration{% endblock %}
+
+{% block extrascripts %}
+    <!-- Custom styles for this template  -->
+    <link href="{% static "Game/css/registration.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Member Registration <small> You are moments away from awesomeness!</small></h1>
+</div>
+
+<div class="container">
+    {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+    {% endif %}
+    <form class="form-signin" action="." method="post">
+        {% csrf_token %}
+        {% if form.has_errors %}
+        <p class="error">Please correct the errors below.</p>
+        {% endif %}        
+        <input id="id_username" maxlength="30" name="username" type="text" class="form-control" placeholder="Username"/>
+        <input type="email" class="form-control" placeholder="Email" id="id_email" name="email" />
+        <input type="password" class="form-control" placeholder="Password" id="id_password1" name="password1" />
+        <input type="password" class="form-control" placeholder="Password (again)" id="id_password2" name="password2" />
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>        
+    </form>
+
+</div>
+{% endblock %}

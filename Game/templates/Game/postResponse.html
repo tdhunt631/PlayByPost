@@ -1,0 +1,41 @@
+<tr class="new">
+    <td style="padding: 0px;">
+        <div class="post" id="{{post.id}}">
+                <!-- charcater and edit buttons -->
+                <div class="clearfix" style="padding: 5px; font-weight: bold; color: {{ post.character.color }}; font-size: 110%">{{ post.character }} 
+                    <!-- if you the admin or the post is yours you can delete it -->     
+                    {% if user.is_staff or post.user == user %}
+                        <span style="color: #999; font-size: 70%; padding-left: 5px;" class="post-remove pull-right glyphicon glyphicon-remove"> </span>                    
+                    {% endif %}
+                </div>
+                <!-- date and comment toggle -->
+                <div style="font-size:80%; color:#999; padding: 5px 5px; margin: -10px 0 0 0;"> {{ post.pub_date|date:'N d, o P' }} - <a href="#" class="commentBtn">comments ({{post.getComments|length}}) </a></div>
+                <!-- here is the actual post -->
+                <div style="padding: 0px 5px 0px 5px; margin: -3px 0 3px 0;">{{ post }}</div>
+                
+                <!-- comments on the post -->
+                <div class="comments" style="background-color: #efefef; display: none; font-size: 95%;">
+                    <div style="padding: 5px 5px 5px 5px; border-bottom: 1px solid white;">
+                        <form class="commentForm" action="{% url 'Game:comment_post' post.id %}" method="post">
+                            {% csrf_token %}
+                            <input placeholder=" Enter your new comment and press enter" style="width: 100%" type="text" id="id_comment" name="comment">
+                        </form>
+                    </div>
+                    {% for comment in post.getComments %}
+                        <div style="margin: 0px; padding: 5px 5px 5px 25px; border-bottom: 1px solid white;">
+                            <div style="font-weight: bold;  font-size: 110%">{{ comment.user }}         
+                                <!-- if you the admin or the post is yours you can delete it -->     
+                                {% if user.is_staff or comment.user == user %}
+                                    <span style="color: #999; font-size: 60%; padding-left: 5px;" class="pull-right glyphicon glyphicon-remove"> </span>
+                                {% endif %}
+                            </div>
+                            <!-- date and comment toggle -->
+                            <div style="font-size:80%; color:#999; position: relative; top: -3px"> {{ comment.pub_date|date:'N d, o P' }}</div>
+                            <!-- here is the actual post -->
+                            <div style="padding: 0px;">{{ comment }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </td>
+</tr>    

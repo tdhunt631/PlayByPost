@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    The Foaming Mug - My Games
+{% endblock %}
+
+{% block extrascripts %}
+   
+{% endblock %}
+
+{% block content%}
+    <div class="page-header">
+        <h1>My Games<small> All the games you are currently in.</small></h1>
+    </div>
+    {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if games %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>Status</th>
+                <th>Game Title</th>
+                <th>Game Description</th>
+                <th>GM</th>
+                <th>Game System</th>
+                <th>Round End</th>
+                <th>&nbsp;</th>
+            </tr>
+            {% for game in games %}
+                <tr>
+                    <td width="60px">
+                        {% if game.is_public %}
+                           Public
+                        {% else %}
+                            Private
+                        {% endif %}
+                    </td>
+                    <td>{{ game.title }}</td>
+                    <td>{{ game.description|truncatewords:50 }}</td>
+                    <td>{{ game.owner }}</td>
+                    <td>{{ game.game_system }}</td>
+                    <td>{{ game.getRoundEnd|date:'M j Y, P'}}</td>
+                    
+                    <td align="center" width="75px">
+                        <a href="/game/{{game.id}}/"  class="btn btn-primary btn-xs">Play</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>You aren't in any games yet.</h3>
+        <a href="{% url 'Game:create_game' %}" style="margin-top: 10px;" type="button" class="btn btn-success btn-sm">New Game</a>
+        <a href="/" style="margin-top: 10px;" type="button" class="btn btn-success btn-sm">Find Game</a>
+    {% endif %}
+{% endblock %}
